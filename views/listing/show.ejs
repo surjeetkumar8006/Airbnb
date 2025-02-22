@@ -1,0 +1,271 @@
+<% layout('layout/boilerplate.ejs') %>
+
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <h1 class="title-display"><%= listing.title %></h1>
+
+      <div class="card mb-5 shadow-sm">
+        <img
+          src="<%= listing.image %>"
+          class="card-img-top"
+          alt="Listing Image"
+          onError="this.src='https://via.placeholder.com/350x150';"
+        />
+        <div class="card-body p-4">
+          <p class="card-text">
+            <strong>Description:</strong> <%= listing.description %><br /><br />
+            <strong>Price:</strong>
+            <% if (listing.price!= null) { %> &#8377; <%=
+            listing.price.toLocaleString("en-IN") %><br /><br />
+            <% } else { %> Price not available<br /><br />
+            <% } %>
+            <strong>Location:</strong> <%= listing.location %><br /><br />
+            <strong>Country:</strong> <%= listing.country %>
+          </p>
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="/listing/<%= listing._id %>/edit" class="btn btn-primary mr-2">Edit this Listing</a>
+
+
+            <form
+              action="/listing/<%= listing._id %>?_method=DELETE"
+              method="post"
+            >
+              <button class="btn btn-danger">Delete this listing</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <div class="mt-5">
+          <h4 class="mb-3">Leave a Review</h4>
+          <form action="/listing/<%= listing._id %>/reviews" method="post" class="needs-validation" novalidate>
+            <div class="form-group mb-4">
+              <label for="rating">Rating</label>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                id="rating"
+                name="review[rating]"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group mb-4">
+              <label for="comment">Comment</label>
+              <textarea
+                name="review[comment]"
+                id="comment"
+                class="form-control"
+                rows="5"
+                required
+                
+              ></textarea>
+              <div class="valid-feedback">Looks good!</div>
+              <div class="invalid-feedback">Please provide a review</div>
+            </div>
+            <button class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <br>
+    <br><hr>
+    <% listing.reviews.forEach(function(review) { %>
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="fas fa-star" style="color: #ffd700;"></i>
+              Rating: <%= review.rating %>/5
+            </h5>
+            <p class="card-text"><%= review.comment %></p>
+            <p class="text-muted">
+              <i class="fas fa-user" style="color: #666;"></i>
+              Reviewed by <%= review.reviewer %>
+            </p>
+            <form action="/listing/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="post">
+              <button class="btn btn-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      <% }); %>
+  </div>
+</div>
+
+
+
+
+
+<style>
+.reviews.btn-delete {
+  font-size: 14px;
+  padding: 5px 10px;
+  margin-top: 10px;
+}
+
+.reviews {
+  padding: 20px;
+  margin-bottom: 40px;
+}
+
+.reviews.card {
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.reviews.card-body {
+  padding: 15px;
+}
+
+.reviews.card-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.reviews.card-text {
+  font-size: 16px;
+  color: #333;
+}
+
+.reviews.fas {
+  margin-right: 5px;
+}
+
+.reviews.text-muted {
+  font-size: 14px;
+  color: #666;
+}
+    .reviews {
+  padding: 20px;
+  margin-bottom: 40px;
+}
+
+.reviews.card {
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.reviews.card-body {
+  padding: 15px;
+}
+
+.reviews.card-title {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.reviews.card-text {
+  font-size: 16px;
+  color: #333;
+}
+  .card-img-top {
+    width: 100%;
+    height: auto;
+    max-height: 500px; /* Ensuring image doesn't become too large */
+    object-fit: cover;
+  }
+  .title-display {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  .card-body {
+    padding: 20px;
+  }
+  .card-text {
+    font-size: 18px;
+  }
+  .form-control {
+    padding: 10px;
+    font-size: 18px;
+  }
+  textarea {
+    height: 150px;
+  }
+  .btn {
+    padding: 10px 20px;
+    font-size: 18px;
+  }
+  /* Add some padding and margin to the reviews section */
+.reviews {
+  padding: 20px;
+  margin-bottom: 40px;
+}
+
+/* Style the review list items */
+.reviews li {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+.reviews li:last-child {
+  border-bottom: none;
+}
+
+/* Style the rating and comment */
+.reviews p {
+  margin-bottom: 10px;
+}
+
+.reviews p.rating {
+  font-weight: bold;
+  color: #666;
+}
+
+.reviews p.comment {
+  font-size: 16px;
+  color: #333;
+}
+
+/* Add some icons for the rating */
+.reviews p.rating:before {
+  font-family: FontAwesome;
+  content: "\f005"; /* star icon */
+  margin-right: 5px;
+  color: #ffd700; /* golden color */
+}
+
+.reviews p.rating:after {
+  content: " / 5";
+  font-size: 14px;
+  color: #666;
+}
+
+/* Add some hover effects */
+.reviews li:hover {
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.reviews li:hover p.rating {
+  color: #333;
+}
+
+.reviews li:hover p.comment {
+  color: #444;
+}
+</style>
+<script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName('needs-validation');
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+</body>
+</html>
