@@ -13,10 +13,13 @@ const userSchema = new mongoose.Schema({
         required: true,  // Ensuring email is required
         unique: true     // Ensuring the email is unique
     },
-    password: String,
+    createdAt: {
+        type: Date,
+        default: Date.now // Automatically sets the account creation date
+    }
 });
 
-// Use passport-local-mongoose to add methods like `authenticate()`, `setPassword()`, etc.
+// Use passport-local-mongoose to add authentication methods
 userSchema.plugin(passportLocalMongoose);
 
 module.exports = mongoose.model("User", userSchema);

@@ -1,54 +1,115 @@
 const express = require("express");
-const router = express.Router();
-const Listing = require("../models/listing.jsx"); // Make sure the model file has .js extension, not .jsx
-const Review = require("../models/review.jsx"); // Same here, check file extension
+const router = express.Router({ mergeParams: true }); // ✅ Merge Params for Listing ID
+const Review = require("../models/review.jsx");
+const Listing = require("../models/listing.jsx");
 
-// Protected route to create a review for a listing
-router.post("/:listingId/review", async (req, res, next) => {
+// ✅ Middleware to Check if User is Logged In
+const ensureAuthenticated = (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    req.flash("error", "You must be logged in to leave a review!");
+    return res.redirect("/login");
+  }
+  next();
+};
+
+// ✅ Submit Review (POST)
+router.post("/", ensureAuthenticated, async (req, res, next) => {
   try {
-    const { listingId } = req.params;
-    const { text, rating } = req.body.review; // Extract text and rating from the request body
+    const { id } = req.params; // ✅ Get Listing ID
+    const { text, rating } = req.body.review;
 
-    // Ensure rating is between 1 and 5
-    if (rating < 1 || rating > 5) {
-      return res.status(400).json({ error: "Rating must be between 1 and 5." });
+    // ✅ Validate Input
+    if (!text || text.trim() === "" || rating < 1 || rating > 5) {
+      req.flash("error", "Invalid Review! Text is required & Rating must be between 1-5.");
+      return res.redirect(`/listing/${id}`);
     }
 
-    // Ensure that text is provided
-    if (!text || text.trim() === "") {
-      return res.status(400).json({ error: "Review text cannot be empty." });
-    }
-
-    // Find the listing by ID
-    const listing = await Listing.findById(listingId);
+    // ✅ Find Listing
+    const listing = await Listing.findById(id);
     if (!listing) {
-      return res.status(404).json({ error: "Listing not found." });
+      req.flash("error", "Listing Not Found!");
+      return res.redirect("/listing");
     }
 
-    // Create a new review
+    // ✅ Create New Review (Include Author)
     const newReview = new Review({
-      text, // Use text for review content
-      rating, // Use rating
-      author: req.user.id, // Associate the review with the logged-in user
-      listing: listingId, // Associate the review with the listing
+      text,
+      rating,
+      author: req.user._id, // 🔥 Ensure `author` is set correctly
+      listing: id,
     });
 
-    // Save the review to the database
     await newReview.save();
-
-    // Add the review to the listing's reviews array
     listing.reviews.push(newReview._id);
     await listing.save();
 
-    // Return success response (instead of redirecting)
-    res.status(201).json({
-      message: "Review submitted successfully.",
-      review: newReview, // Optional: Return the review object if needed
-    });
-
+    req.flash("success", "Review Submitted Successfully!");
+    res.redirect(`/listing/${id}`);
   } catch (error) {
-    next(error); // Pass the error to the error handler
+    next(error);
+  }
+});
+
+// ✅ Update Review (PUT)
+router.put("/:reviewId", ensureAuthenticated, async (req, res, next) => {
+  try {
+    const { id, reviewId } = req.params;
+    const { text, rating } = req.body.review;
+
+    if (!text || text.trim() === "" || rating < 1 || rating > 5) {
+      req.flash("error", "Invalid Review! Text is required & Rating must be between 1-5.");
+      return res.redirect(`/listing/${id}`);
+    }
+
+    // ✅ Find Review and Check if User is Owner
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      req.flash("error", "Review Not Found!");
+      return res.redirect(`/listing/${id}`);
+    }
+    if (!review.author.equals(req.user._id)) {
+      req.flash("error", "You don't have permission to edit this review!");
+      return res.redirect(`/listing/${id}`);
+    }
+
+    // ✅ Update Review in DB
+    review.text = text;
+    review.rating = rating;
+    await review.save();
+
+    req.flash("success", "Review Updated Successfully!");
+    res.redirect(`/listing/${id}`);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ✅ Delete Review (DELETE)
+router.delete("/:reviewId", ensureAuthenticated, async (req, res, next) => {
+  try {
+    const { id, reviewId } = req.params;
+
+    // ✅ Find Review and Check if User is Owner
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      req.flash("error", "Review Not Found!");
+      return res.redirect(`/listing/${id}`);
+    }
+    if (!review.author.equals(req.user._id)) {
+      req.flash("error", "You don't have permission to delete this review!");
+      return res.redirect(`/listing/${id}`);
+    }
+
+    // ✅ Delete Review from DB
+    await review.deleteOne();
+    await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+
+    req.flash("success", "Review Deleted Successfully!");
+    res.redirect(`/listing/${id}`);
+  } catch (error) {
+    next(error);
   }
 });
 
 module.exports = router;
+  

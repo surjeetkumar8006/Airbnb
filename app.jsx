@@ -3,93 +3,84 @@ const app = express();
 const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
-const session = require('express-session');
+const session = require("express-session");
 const passport = require("passport");
-const localStrategy = require("passport-local");
-const connectFlash = require('connect-flash'); // Import connect-flash
+const LocalStrategy = require("passport-local");
+const flash = require("connect-flash");
 const ejsMate = require("ejs-mate");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+require("dotenv").config();
 
-const listing = require("./routes/listing.jsx");
-const reviews = require("./routes/review.jsx");
-const User = require("./models/user.jsx");  // Corrected to use User model
-const userRouter = require("./routes/user.jsx");
+// ✅ Import Models & Routes
+const User = require("./models/user.jsx");
+const listingRoutes = require("./routes/listing.jsx");
+const userRoutes = require("./routes/user.jsx");
+const dashboardRoutes = require("./routes/dashboard.js"); // ✅ New Dashboard Route
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+// ✅ MongoDB Connection
+const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/wanderlust";
+mongoose.set("strictQuery", true);
+mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
-// MongoDB connection
-async function main() {
-    try {
-        await mongoose.connect(MONGO_URL);
-        console.log("Connected to MongoDB");
-    } catch (error) {
-        console.error("Error connecting to MongoDB:", error);
-    }
-}
-main();
-
-// Middleware and settings
-app.engine('ejs', ejsMate);
+// ✅ View Engine Setup
+app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+
+// ✅ Middleware
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(methodOverride("_method"));
-app.use(express.static(path.join(__dirname, "/public")));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(cookieParser());
+app.use(cors());
 
-// Flash messages middleware
-app.use(connectFlash()); // Initialize connect-flash middleware
-
-// Session setup
-const sessionOptions = {
-  secret: 'secret',
+// ✅ Session Setup
+app.use(session({
+  secret: process.env.SESSION_SECRET || "supersecretkey",
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 day
-};
+  cookie: { maxAge: 1000 * 60 * 60 * 24 },
+}));
 
-app.use(session(sessionOptions));
+// ✅ Flash Messages Middleware
+app.use(flash());
 
-// Passport setup
+// ✅ Passport Setup
 app.use(passport.initialize());
 app.use(passport.session());
-
-passport.use(new localStrategy(User.authenticate()));
+passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// Middleware to pass the current user to all views
+// ✅ Middleware to Pass Flash Messages & User to Views
 app.use((req, res, next) => {
-    res.locals.user = req.user; // Pass the user to all views
-    next();
+  res.locals.user = req.user;
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
 });
 
-// Routes
+// ✅ Home Route
 app.get("/", (req, res) => {
-    res.render("home", { 
-        loginSuccess: req.flash('loginSuccess'), 
-        signupSuccess: req.flash('signupSuccess') 
-    });
+  res.render("home");
 });
 
-app.use("/listing", listing);
-app.use("/listing/:id/reviews", reviews);
-app.use("/", userRouter);
+// ✅ Use Routes
+app.use("/", userRoutes);
+app.use("/listing", listingRoutes);
+app.use("/dashboard", dashboardRoutes); // ✅ New Dashboard Route
 
-// 404 Error Handling Route
-app.all('*', (req, res) => {
-    res.status(404).render("error1", { error: "Page not found" });
+// ✅ 404 Error Handler
+app.all("*", (req, res) => {
+  res.status(404).render("error", { error: "Page not found" });
 });
 
-const reviewRoutes = require('./routes/review.jsx');
-app.use('/reviews', reviewRoutes); // Mount the reviews router at /reviews
-
-// General error handling middleware (500 Error)
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).render("error", { error: err.message });  // Ensure error.ejs exists in views
-});
-
-// Server
-const port = process.env.PORT || 8080;
-app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+// ✅ Start Server
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
