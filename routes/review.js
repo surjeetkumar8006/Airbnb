@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true }); // ✅ Merge Params for Listing ID
-const Review = require("../models/review.jsx");
-const Listing = require("../models/listing.jsx");
+const Review = require("../models/review.js");
+const Listing = require("../models/listing.js");
 
 // ✅ Middleware to Check if User is Logged In
 const ensureAuthenticated = (req, res, next) => {

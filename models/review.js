@@ -28,4 +28,5 @@ const reviewSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Review", reviewSchema);
+// ✅ Check if model already exists before defining
+module.exports = mongoose.models.Review || mongoose.model("Review", reviewSchema);

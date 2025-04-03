@@ -13,10 +13,11 @@ const cors = require("cors");
 require("dotenv").config();
 
 // ✅ Import Models & Routes
-const User = require("./models/user.jsx");
-const listingRoutes = require("./routes/listing.jsx");
-const userRoutes = require("./routes/user.jsx");
-const dashboardRoutes = require("./routes/dashboard.js"); // ✅ New Dashboard Route
+const User = require("./models/user.js"); // ⬅️ FIXED (jsx हटाया)
+const listingRoutes = require("./routes/listing.js");
+const userRoutes = require("./routes/user.js");
+const dashboardRoutes = require("./routes/dashboard.js");
+const reviewRoutes = require("./routes/review.js"); // ⬅️ FIXED (jsx हटाया)
 
 // ✅ MongoDB Connection
 const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/wanderlust";
@@ -42,19 +43,19 @@ app.use(cors());
 app.use(session({
   secret: process.env.SESSION_SECRET || "supersecretkey",
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false, // ⬅️ FIXED (False किया)
   cookie: { maxAge: 1000 * 60 * 60 * 24 },
 }));
 
-// ✅ Flash Messages Middleware
-app.use(flash());
-
-// ✅ Passport Setup
+// ✅ Passport Setup (पहले लाना जरूरी है)
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+// ✅ Flash Messages Middleware
+app.use(flash());
 
 // ✅ Middleware to Pass Flash Messages & User to Views
 app.use((req, res, next) => {
@@ -72,14 +73,15 @@ app.get("/", (req, res) => {
 // ✅ Use Routes
 app.use("/", userRoutes);
 app.use("/listing", listingRoutes);
-app.use("/dashboard", dashboardRoutes); // ✅ New Dashboard Route
+app.use("/dashboard", dashboardRoutes);
+app.use("/listing/:id/reviews", reviewRoutes); // ✅ सही जगह पर लगाया
 
 // ✅ 404 Error Handler
 app.all("*", (req, res) => {
   res.status(404).render("error", { error: "Page not found" });
 });
 
-// ✅ Start Server
+// ✅ Server Start (Port Busy Fix)
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

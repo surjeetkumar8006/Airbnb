@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/user.jsx");
+const User = require("../models/user.js");
 
 // ✅ Middleware to Check Authentication
 const isLoggedIn = (req, res, next) => {

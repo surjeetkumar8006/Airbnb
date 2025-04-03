@@ -35,15 +35,22 @@
 <body>
     <div class="container">
         <div class="dashboard-container">
-            <h2 class="dashboard-title"><i class="fas fa-user-circle"></i> Welcome, <%= user.username %>!</h2>
-            <p class="dashboard-info"><strong>Email:</strong> <%= user.email %></p>
-            <p class="dashboard-info"><strong>Joined On:</strong> <%= user.createdAt.toDateString() %></p>
-
-            <!-- ✅ New Buttons -->
-            <a href="/" class="btn btn-primary btn-dashboard"><i class="fas fa-home"></i> Home</a>
-            <a href="/listing" class="btn btn-success btn-dashboard"><i class="fas fa-search"></i> Explore Listings</a>
-            <a href="/profile/edit" class="btn btn-warning btn-dashboard"><i class="fas fa-edit"></i> Edit Profile</a>
-            <a href="/logout" class="btn btn-danger btn-dashboard"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <% if (user) { %>
+                <h2 class="dashboard-title"><i class="fas fa-user-circle"></i> Welcome, <%= user.username %>!</h2>
+                <p class="dashboard-info"><strong>Email:</strong> <%= user.email %></p>
+                <p class="dashboard-info"><strong>Joined On:</strong> 
+                    <%= user.createdAt ? new Date(user.createdAt).toDateString() : "Date Not Available" %>
+                  </p>
+                  
+                <!-- ✅ New Buttons -->
+                <a href="/" class="btn btn-primary btn-dashboard"><i class="fas fa-home"></i> Home</a>
+                <a href="/listing" class="btn btn-success btn-dashboard"><i class="fas fa-search"></i> Explore Listings</a>
+                <a href="/profile/edit" class="btn btn-warning btn-dashboard"><i class="fas fa-edit"></i> Edit Profile</a>
+                <a href="/logout" class="btn btn-danger btn-dashboard"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            <% } else { %>
+                <h2 class="dashboard-title"><i class="fas fa-user-circle"></i> Welcome, Guest!</h2>
+                <p class="dashboard-info">Please <a href="/login">log in</a> to access your dashboard.</p>
+            <% } %>
         </div>
     </div>
 
