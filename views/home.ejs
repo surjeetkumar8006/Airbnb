@@ -35,10 +35,10 @@
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
 
-        header h1 {
+        .menu-toggle {
+            display: none;
             font-size: 24px;
-            font-weight: 600;
-            letter-spacing: 1px;
+            cursor: pointer;
         }
 
         nav {
@@ -118,12 +118,41 @@
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            
+            nav {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                right: 20px;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 10px;
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+                width: 200px;
+                text-align: right;
+            }
+
+            nav.show {
+                display: flex;
+            }
+
+            nav a {
+                margin: 10px;
+            }
+        }
     </style>
 </head>
 <body>
 
 <header>
     <h1>Wanderlust</h1>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
     <nav>
         <a href="/listing">Explore</a>
         <% if (user) { %>
@@ -133,7 +162,6 @@
             <a href="/login">Login</a>
             <a href="/signup">Sign Up</a>
         <% } %>
-        
     </nav>
 </header>
 
@@ -146,6 +174,12 @@
 <footer>
     <p>&copy; 2025 Wanderlust. All rights reserved.</p>
 </footer>
+
+<script>
+    function toggleMenu() {
+        document.querySelector('nav').classList.toggle('show');
+    }
+</script>
 
 </body>
 </html>

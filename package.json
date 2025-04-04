@@ -1,15 +1,16 @@
 {
   "name": "airbnb-project",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Airbnb clone using Node.js, Express, and MongoDB",
+  "main": "app.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "prod": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["airbnb", "nodejs", "express", "mongodb"],
+  "author": "Er. Surjeet Kumar",
   "license": "ISC",
   "dependencies": {
     "connect-flash": "^0.1.1",
