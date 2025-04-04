@@ -1,12 +1,12 @@
 {
+  "engines": {
+    "node": "22.14.0"
+  },
   "name": "airbnb-project",
   "version": "1.0.0",
   "description": "Airbnb clone using Node.js, Express, and MongoDB",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "prod": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": ["airbnb", "nodejs", "express", "mongodb"],
