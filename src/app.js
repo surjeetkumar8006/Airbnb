@@ -13,11 +13,11 @@ const cors = require("cors");
 require("dotenv").config();
 
 // ✅ Import Models & Routes
-const User = require("./models/user.js"); // ⬅️ FIXED (jsx हटाया)
-const listingRoutes = require("./routes/listing.js");
-const userRoutes = require("./routes/user.js");
-const dashboardRoutes = require("./routes/dashboard.js");
-const reviewRoutes = require("./routes/review.js"); // ⬅️ FIXED (jsx हटाया)
+const User = require("../models/user.js"); // ⬅️ FIXED (jsx हटाया)
+const listingRoutes = require("../routes/listing.js");
+const userRoutes = require("../routes/user.js");
+const dashboardRoutes = require("../routes/dashboard.js");
+const reviewRoutes = require("../routes/review.js"); // ⬅️ FIXED (jsx हटाया)
 
 // ✅ MongoDB Connection
 const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/wanderlust";
@@ -43,21 +43,20 @@ app.use(cors());
 app.use(session({
   secret: process.env.SESSION_SECRET || "supersecretkey",
   resave: false,
-  saveUninitialized: false, // ⬅️ FIXED (False किया)
+  saveUninitialized: false,
   cookie: { maxAge: 1000 * 60 * 60 * 24 },
 }));
 
-// ✅ Passport Setup (पहले लाना जरूरी है)
+app.use(express.static('public'));
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// ✅ Flash Messages Middleware
 app.use(flash());
-
-// ✅ Middleware to Pass Flash Messages & User to Views
 app.use((req, res, next) => {
   res.locals.user = req.user;
   res.locals.success = req.flash("success");
@@ -81,7 +80,6 @@ app.all("*", (req, res) => {
   res.status(404).render("error", { error: "Page not found" });
 });
 
-// ✅ Server Start (Port Busy Fix)
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
