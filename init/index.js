@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Listing = require("../models/listing.js");
 const initData = require("./data.js");
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+const MONGO_URL = "mongodb+srv://ersurjeet:surjeetkumar@zoom.kxiqqdp.mongodb.net/wanderlust?retryWrites=true&w=majority";
 const defaultAuthorId = "65a12345b6c78d90e1f23456"; // Replace with a valid User ID
 
 mongoose
